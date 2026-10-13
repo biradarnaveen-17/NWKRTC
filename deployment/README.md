@@ -1,11 +1,27 @@
 # Deployment notes
 
-This is a development prototype. Do not expose it publicly or use it for real leave submissions yet.
+The repository includes a Dockerfile and local-only Docker Compose configuration. This is a deployment starting point, not an AWS deployment that has already been performed.
+
+## Test the container locally
+
+    docker compose up --build -d
+    docker compose ps
+    docker compose logs -f web
+
+Open http://127.0.0.1:8000 and confirm the health endpoint reports simulation mode:
+
+    curl http://127.0.0.1:8000/api/health
+
+Stop it with:
+
+    docker compose down
+
+Request data persists in the named Docker volume. To remove the volume as well, use `docker compose down -v` only if you intentionally want to delete the local test history.
 
 ## Before any AWS deployment
 
 - Use an EC2 instance in a supported region and restrict inbound access.
-- Do not open the app directly to the whole internet.
+- The Compose file binds port 8000 to loopback only. Do not change it to a public bind until HTTPS and authentication are in place.
 - Put HTTPS and authentication in front of the dashboard.
 - Store secrets in AWS Secrets Manager or Systems Manager Parameter Store; never in Git.
 - Configure backups, logs, updates, and a way to stop the worker.
@@ -14,11 +30,10 @@ This is a development prototype. Do not expose it publicly or use it for real le
 ## First smoke test
 
 1. Create an isolated test environment.
-2. Install Python 3.11+ and the requirements.
-3. Run the app behind a local-only bind first.
-4. Confirm /api/health reports simulation mode.
-5. Submit only a simulated request and verify the status is SIMULATED.
-6. Run pytest -q and confirm the workflow checks pass.
+2. Run the container.
+3. Confirm /api/health reports simulation mode and portal access disabled.
+4. Prepare a test request and confirm its status is SIMULATED.
+5. Run `pytest -q` and confirm the workflow checks pass.
 
 ## Live automation safeguards required before implementation
 
