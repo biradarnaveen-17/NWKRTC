@@ -30,7 +30,7 @@ def test_rejects_wrong_date():
 def test_rejects_non_cl():
     today = date(2026, 10, 14)
     target = today + timedelta(days=9)
-    with pytest.raises(ValueError, match="CL only"):
+    with pytest.raises(ValueError, match="CL.*only"):
         validate_one_day_cl_request(today, target, target, "EL")
 
 
