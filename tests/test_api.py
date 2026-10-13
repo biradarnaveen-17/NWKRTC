@@ -74,3 +74,35 @@ def test_missing_job_returns_404(monkeypatch):
         response = client.get("/api/jobs/999999")
 
     assert response.status_code == 404
+
+
+def test_dashboard_api_requires_configured_credentials(monkeypatch):
+    monkeypatch.setattr(app_module, "ADMIN_USERNAME", "admin")
+    monkeypatch.setattr(app_module, "ADMIN_PASSWORD", "test-password")
+    with TestClient(app_module.app) as client:
+        denied = client.get("/api/rules")
+        accepted = client.get("/api/rules", auth=("admin", "test-password"))
+
+    assert denied.status_code == 401
+    assert accepted.status_code == 200
+
+
+def test_production_fails_closed_when_auth_is_not_configured(monkeypatch):
+    monkeypatch.setattr(app_module, "APP_ENV", "production")
+    monkeypatch.setattr(app_module, "ADMIN_USERNAME", "")
+    monkeypatch.setattr(app_module, "ADMIN_PASSWORD", "")
+    with TestClient(app_module.app) as client:
+        response = client.get("/api/rules")
+
+    assert response.status_code == 503
+
+
+def test_cross_origin_state_change_is_rejected():
+    with TestClient(app_module.app) as client:
+        response = client.post(
+            "/api/jobs",
+            headers={"Origin": "https://attacker.example"},
+            json={"leave_date": "2099-01-01", "leave_type": "CL"},
+        )
+
+    assert response.status_code == 403
