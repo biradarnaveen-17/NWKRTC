@@ -9,7 +9,7 @@ def test_mock_workflow_has_simulated_steps_only():
     result = run_mock_workflow(date(2026, 10, 14), date(2026, 10, 23))
     assert result.status == "SIMULATED"
     assert "simulation_complete" in result.steps
-    assert "live portal" in result.message.lower()
+    assert "no nwkrtc website was opened" in result.message.lower()
 
 
 def test_mock_workflow_rejects_invalid_date():
