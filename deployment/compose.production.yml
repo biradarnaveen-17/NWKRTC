@@ -1,0 +1,53 @@
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      DATABASE_PATH: /app/data/nwkrtc_jobs.sqlite3
+      TZ: Asia/Kolkata
+      NWKRTC_ADMIN_USERNAME: ${NWKRTC_ADMIN_USERNAME:?Set NWKRTC_ADMIN_USERNAME in the server environment}
+      NWKRTC_ADMIN_PASSWORD: ${NWKRTC_ADMIN_PASSWORD:?Set NWKRTC_ADMIN_PASSWORD in the server environment}
+    expose:
+      - "8000"
+    volumes:
+      - nwkrtc_data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid
+    cap_drop:
+      - ALL
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      CADDY_DOMAIN: ${CADDY_DOMAIN:?Set CADDY_DOMAIN to a domain pointing at this server}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  nwkrtc_data:
+  caddy_data:
+  caddy_config:
