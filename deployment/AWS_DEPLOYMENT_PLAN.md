@@ -21,7 +21,7 @@ The application is a simulation-only FastAPI service with a static dashboard and
 
 1. Run the test suite in GitHub Actions and fix every failure.
 2. Build and run the container locally; verify /api/health, /api/rules, and validation errors.
-3. Add authentication and CSRF protections for browser-driven state-changing requests before hosting the dashboard.
+3. Configure the prototype's `NWKRTC_ADMIN_USERNAME` and `NWKRTC_ADMIN_PASSWORD` through a secret store; verify production fails closed if missing. The app checks same-origin on browser state-changing requests. Before public exposure, still add HTTPS, rate limiting, monitoring, and preferably a managed identity provider; HTTP Basic alone is not a complete production identity solution.
 4. Create AWS resources manually or through reviewed infrastructure-as-code, with budget alerts and a clear teardown plan.
 5. Deploy the simulation version first and verify HTTPS, access restrictions, persistent storage, logs, restart behavior, and backup/restore.
 6. Keep live portal integration disabled until the portal owner confirms automation is permitted and the single-session behavior is understood.
