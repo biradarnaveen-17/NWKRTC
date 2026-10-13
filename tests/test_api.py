@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from fastapi.testclient import TestClient
 
 import backend.app as app_module
@@ -20,10 +22,8 @@ def test_rules_endpoint_returns_nine_day_eligible_date():
 
     assert response.status_code == 200
     payload = response.json()
-    from datetime import date
-
     assert date.fromisoformat(payload["eligible_date"]) == (
-        date.fromisoformat(payload["today"]) + __import__("datetime").timedelta(days=9)
+        date.fromisoformat(payload["today"]) + timedelta(days=9)
     )
     assert payload["days_ahead"] == 9
 
@@ -55,8 +55,6 @@ def test_create_job_rejects_wrong_leave_type():
 
 
 def test_create_job_rejects_wrong_date():
-    from datetime import date, timedelta
-
     with TestClient(app_module.app) as client:
         rules = client.get("/api/rules").json()
         wrong_date = (
