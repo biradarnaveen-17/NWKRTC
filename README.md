@@ -49,9 +49,18 @@ The process logs a simulated preflight at 05:57 and a mock workflow at 06:00, us
 - GET /api/jobs — list recent records
 - GET /api/jobs/{id} — inspect one record
 
+## Dashboard access protection
+
+- In local development, authentication is off by default.
+- When both `NWKRTC_ADMIN_USERNAME` and `NWKRTC_ADMIN_PASSWORD` are set, the dashboard and job/rules APIs require HTTP Basic authentication.
+- With `APP_ENV=production`, the app fails closed with HTTP 503 if those credentials are missing; interactive API docs are also disabled.
+- Browser state-changing requests with an `Origin` header are rejected unless the origin matches the request host.
+- Configure secrets through your deployment secret store; `.env.example` contains placeholders only. Never commit a real `.env` file or password.
+- HTTP Basic is a prototype access gate, not a substitute for HTTPS, rate limiting, monitoring, and preferably a managed identity provider in an internet-facing deployment.
+
 ## AWS deployment: not performed yet
 
-Before any internet-accessible deployment, add authentication, HTTPS, network restrictions, logging, backups, and a safe stop mechanism. Do not expose an unauthenticated leave-control panel to the public internet.
+Before any internet-accessible deployment, configure authentication, HTTPS, network restrictions, logging, backups, and a safe stop mechanism. Do not expose an unauthenticated leave-control panel to the public internet.
 
 ## Live portal integration is intentionally disabled
 
