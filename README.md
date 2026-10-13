@@ -2,19 +2,20 @@
 
 A mobile-friendly dashboard and cloud-worker prototype for preparing an NWKRTC leave application workflow.
 
-## Current status: safe simulation prototype
+## Current status: simulation-only prototype
 
-This version **does not log in to the live NWKRTC portal and does not submit leave applications**. It implements the mobile UI, a small API, request history, and the date rule described for the portal. Live integration must only be added after confirming that automated access is permitted and testing the workflow safely.
+The app does **not** log in to the live NWKRTC portal or submit leave applications. It includes the dashboard, a FastAPI backend, SQLite request history, date validation, and a scheduled mock workflow.
 
 ## Features
 
-- Mobile-friendly dashboard
+- Responsive dashboard for phone and desktop
 - India-time date calculation (Asia/Kolkata)
 - One-day Casual Leave (CL) validation
-- Validates the user-described rule: eligible date is exactly 9 calendar days ahead
+- Checks the user-described rule: eligible date is exactly 9 calendar days ahead
 - SQLite request history
-- Simulation-only request creation with clear status
-- Tests for month boundaries and invalid dates
+- Simulation-only job creation
+- Mock workflow for preflight and the 6:00 AM sequence
+- Unit tests and GitHub Actions test workflow
 
 ## Run locally
 
@@ -32,24 +33,34 @@ Run tests:
 
     pytest -q
 
-## Important behavior
+## Run the scheduler simulation
 
-- The app uses the current date in India to calculate the eligible date.
-- A request is accepted only when the chosen date is exactly nine calendar days ahead and the leave type is CL.
-- The request is stored as SIMULATED; this is not proof of an application in the NWKRTC system.
-- No retry or auto-submit behavior exists. The app never touches the live portal.
+In a separate terminal:
 
-## AWS deployment (next milestone)
+    python -m backend.scheduler
 
-Deploy behind HTTPS and restrict access before exposing it publicly. Use a private security group, a reverse proxy with TLS, and a service manager. Configure a durable database and CloudWatch logging before production use. Do not expose an unauthenticated leave-control panel to the public internet.
+The process logs a simulated preflight at 05:57 and a mock workflow at 06:00, using Asia/Kolkata time. It runs continuously until stopped with Ctrl+C. It does not open a browser, use credentials, or contact NWKRTC. Do not treat SIMULATED as a real application.
 
-## Live portal integration is intentionally out of scope
+## API endpoints
 
-Before adding it:
-1. Confirm the portal/organization permits browser automation.
-2. Verify the single-session behavior and expected session expiry.
-3. Do not store passwords, cookies, or employee details in GitHub.
+- GET /api/health — health and current safety mode
+- GET /api/rules — current India date and eligible date
+- POST /api/jobs — create a validated simulation record
+- GET /api/jobs — list recent records
+- GET /api/jobs/{id} — inspect one record
+
+## AWS deployment: not performed yet
+
+Before any internet-accessible deployment, add authentication, HTTPS, network restrictions, logging, backups, and a safe stop mechanism. Do not expose an unauthenticated leave-control panel to the public internet.
+
+## Live portal integration is intentionally disabled
+
+Before implementing live browser automation:
+1. Confirm the portal owner/organization permits it.
+2. Verify the single-session behavior and session expiry.
+3. Never commit credentials, cookies, employee identifiers, or .env files.
 4. Require explicit review before any real leave submission.
 5. Treat timeouts after clicking Apply as UNKNOWN and verify portal status before any retry to avoid duplicate requests.
+6. Do not bypass CAPTCHA, access controls, or session restrictions.
 
-Never commit credentials or session cookies. Keep .env local and use AWS Secrets Manager/SSM Parameter Store if an authorized integration is later approved.
+Keep secrets local during development; if an authorized integration is approved, use AWS Secrets Manager or Systems Manager Parameter Store.
