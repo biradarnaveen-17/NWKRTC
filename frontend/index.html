@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>NWKRTC Leave Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div class="brand-mark" aria-hidden="true">N</div>
+      <div><p class="eyebrow">CLOUD WORKFLOW PROTOTYPE</p><h1>NWKRTC Leave Assistant</h1></div>
+    </header>
+    <section class="notice" role="status">
+      <strong>Simulation mode</strong>
+      <p>This version does not log in to the live portal or submit a leave application. Use it to test the mobile UI and date rules first.</p>
+    </section>
+    <section class="panel">
+      <h2>Prepare a one-day leave request</h2>
+      <p class="muted">Configured for Casual Leave (CL) and the 9-calendar-day eligibility rule described for your portal.</p>
+      <div class="rule-card">
+        <span>Eligible date according to this rule</span>
+        <strong id="eligible-date">Loading…</strong>
+        <small id="today-label"></small>
+      </div>
+      <form id="leave-form">
+        <label for="leave-date">Leave date</label>
+        <input id="leave-date" name="leave-date" type="date" required>
+        <label for="leave-type">Leave type</label>
+        <select id="leave-type" name="leave-type"><option value="CL">Casual Leave (CL)</option></select>
+        <button id="submit-button" type="submit">Prepare test request</button>
+      </form>
+      <p id="feedback" class="feedback" aria-live="polite"></p>
+    </section>
+    <section class="panel">
+      <div class="section-heading"><h2>Recent requests</h2><button id="refresh-button" class="secondary" type="button">Refresh</button></div>
+      <div id="jobs" class="jobs"><p class="muted">Loading requests…</p></div>
+    </section>
+    <footer>Keep portal passwords, cookies, and employee data out of this app and out of GitHub.</footer>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
